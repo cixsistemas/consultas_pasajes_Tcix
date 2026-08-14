@@ -13,8 +13,6 @@ interface Props {
   login: string;
 }
 
-
-
 export default function ConsultaPasajesClient({
   login,
 }: Props) {
@@ -34,54 +32,60 @@ export default function ConsultaPasajesClient({
   const [consultado, setConsultado] =
     useState(false);
 
-  const [cerrandoSesion, setCerrandoSesion] =
-    useState(false);
+  const [
+    cerrandoSesion,
+    setCerrandoSesion,
+  ] = useState(false);
 
-    // ===========================================================
-    // CERRAR SESIÓN
-    // ===========================================================
 
-    async function cerrarSesion() {
+  // ===========================================================
+  // CERRAR SESIÓN
+  // ===========================================================
+
+  async function cerrarSesion() {
     try {
-        setCerrandoSesion(true);
-        setMensaje("");
 
-        const response = await fetch(
+      setCerrandoSesion(true);
+      setMensaje("");
+
+      const response = await fetch(
         "/api/auth/logout",
         {
-            method: "POST",
+          method: "POST",
         }
-        );
+      );
 
-        if (!response.ok) {
+      if (!response.ok) {
+
         setMensaje(
-            "No se pudo cerrar la sesión."
+          "No se pudo cerrar la sesión."
         );
 
         return;
-        }
+      }
 
-        // Regresa al login sin conservar
-        // el panel en el historial.
-        window.location.replace("/login");
+      // Regresa al login y evita conservar
+      // el panel en el historial.
+      window.location.replace("/login");
 
     } catch (error) {
 
-        console.error(
+      console.error(
         "Error cerrando sesión:",
         error
-        );
+      );
 
-        setMensaje(
+      setMensaje(
         "No se pudo cerrar la sesión."
-        );
+      );
 
     } finally {
 
-        setCerrandoSesion(false);
+      setCerrandoSesion(false);
 
     }
-    }
+  }
+
 
   // ===========================================================
   // CONSULTAR
@@ -90,13 +94,17 @@ export default function ConsultaPasajesClient({
   async function consultar(
     event: FormEvent<HTMLFormElement>
   ) {
+
     event.preventDefault();
 
     setMensaje("");
     setConsultado(false);
 
+    // El número de documento puede contener
+    // letras y números.
     if (!/^[A-Za-z0-9]{8,20}$/.test(dni)) {
-    setMensaje(
+
+      setMensaje(
         "Ingrese un número de documento válido de al menos 8 caracteres."
       );
 
@@ -104,6 +112,7 @@ export default function ConsultaPasajesClient({
     }
 
     try {
+
       setCargando(true);
 
       const response = await fetch(
@@ -116,14 +125,18 @@ export default function ConsultaPasajesClient({
         }
       );
 
+      // Si la sesión expiró, regresar al login.
       if (response.status === 401) {
+
         window.location.href = "/login";
+
         return;
       }
 
       const data = await response.json();
 
       if (!response.ok) {
+
         setMensaje(
           data.mensaje ??
             "No se pudo realizar la consulta."
@@ -134,10 +147,14 @@ export default function ConsultaPasajesClient({
         return;
       }
 
-      setPasajes(data.data ?? []);
+      setPasajes(
+        data.data ?? []
+      );
+
       setConsultado(true);
 
     } catch {
+
       setMensaje(
         "No se pudo conectar con el servidor."
       );
@@ -145,24 +162,33 @@ export default function ConsultaPasajesClient({
       setPasajes([]);
 
     } finally {
+
       setCargando(false);
+
     }
   }
 
+
   // ===========================================================
-  // FECHAS
+  // FORMATO DE FECHA
   // ===========================================================
 
   function formatearFecha(
     fecha: string | null
   ) {
+
     if (!fecha) {
       return "-";
     }
 
-    const value = new Date(fecha);
+    const value =
+      new Date(fecha);
 
-    if (Number.isNaN(value.getTime())) {
+    if (
+      Number.isNaN(
+        value.getTime()
+      )
+    ) {
       return fecha;
     }
 
@@ -176,17 +202,33 @@ export default function ConsultaPasajesClient({
     ).format(value);
   }
 
-function formatearHora(hora: string) {
-  if (!hora) {
-    return "-";
+
+  // ===========================================================
+  // FORMATO DE HORA
+  // ===========================================================
+
+  function formatearHora(
+    hora: string
+  ) {
+
+    if (!hora) {
+      return "-";
+    }
+
+    // Conserva exactamente el formato recibido
+    // desde SQL Server, por ejemplo: 03:00PM.
+    return hora.trim();
   }
 
-  return hora.trim();
-}
+
+  // ===========================================================
+  // FORMATO DE PRECIO
+  // ===========================================================
 
   function formatearPrecio(
     precio: number
   ) {
+
     return new Intl.NumberFormat(
       "es-PE",
       {
@@ -196,56 +238,109 @@ function formatearHora(hora: string) {
     ).format(precio);
   }
 
+
   // ===========================================================
   // INTERFAZ
   // ===========================================================
 
   return (
+
     <main className="min-h-screen bg-slate-50">
+
 
       {/* =====================================================
           CABECERA
           ===================================================== */}
-        <header className="bg-slate-950 text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-5 sm:px-6 lg:px-8">
 
-            {/* TÍTULO */}
-            <div className="min-w-0">
+      <header className="bg-slate-950 text-white">
 
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-blue-300">
-                Transportes Chiclayo
+        <div className="
+          mx-auto
+          flex
+          max-w-7xl
+          items-center
+          justify-between
+          gap-4
+          px-4
+          py-5
+          sm:px-6
+          lg:px-8
+        ">
+
+
+          {/* TÍTULO */}
+
+          <div className="min-w-0">
+
+            <p className="
+              text-xs
+              font-medium
+              uppercase
+              tracking-[0.2em]
+              text-orange-300
+            ">
+              Transportes Chiclayo
             </p>
 
-            <h1 className="mt-1 text-xl font-semibold sm:text-2xl">
-                Consulta de pasajes
+            <h1 className="
+              mt-1
+              text-xl
+              font-semibold
+              sm:text-2xl
+            ">
+              Consulta de pasajes
             </h1>
 
-            </div>
+          </div>
 
-            {/* USUARIO + CERRAR SESIÓN */}
-            <div className="flex shrink-0 items-center gap-3 sm:gap-5">
+
+          {/* USUARIO + CERRAR SESIÓN */}
+
+          <div className="
+            flex
+            shrink-0
+            items-center
+            gap-3
+            sm:gap-5
+          ">
 
             {login && (
-                <div className="hidden text-right sm:block">
 
-                <p className="text-xs text-slate-400">
-                    Usuario
+              <div className="
+                hidden
+                text-right
+                sm:block
+              ">
+
+                <p className="
+                  text-xs
+                  text-slate-400
+                ">
+                  Usuario
                 </p>
 
-                <p className="max-w-[220px] truncate text-sm font-medium">
-                    {login}
+                <p className="
+                  max-w-[220px]
+                  truncate
+                  text-sm
+                  font-medium
+                ">
+                  {login}
                 </p>
 
-                </div>
+              </div>
+
             )}
 
+
             <button
-                type="button"
-                onClick={cerrarSesion}
-                disabled={cerrandoSesion}
-                title="Cerrar sesión"
-                aria-label="Cerrar sesión"
-                className="
+              type="button"
+              onClick={cerrarSesion}
+              disabled={cerrandoSesion}
+              title="Cerrar sesión"
+              aria-label="Cerrar sesión"
+
+              className="
                 inline-flex
                 h-10
                 items-center
@@ -265,15 +360,16 @@ function formatearHora(hora: string) {
                 hover:text-white
                 focus:outline-none
                 focus:ring-2
-                focus:ring-blue-500
+                focus:ring-orange-500
                 disabled:cursor-not-allowed
                 disabled:opacity-50
                 sm:px-4
-                "
+              "
             >
 
-                {/* ICONO CERRAR SESIÓN */}
-                <svg
+              {/* ICONO CERRAR SESIÓN */}
+
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
                 height="18"
@@ -284,87 +380,152 @@ function formatearHora(hora: string) {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 aria-hidden="true"
-                >
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              >
+
+                <path
+                  d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+                />
 
                 <polyline
-                    points="16 17 21 12 16 7"
+                  points="16 17 21 12 16 7"
                 />
 
                 <line
-                    x1="21"
-                    x2="9"
-                    y1="12"
-                    y2="12"
+                  x1="21"
+                  x2="9"
+                  y1="12"
+                  y2="12"
                 />
-                </svg>
 
-                <span className="hidden sm:inline">
-                {cerrandoSesion
+              </svg>
+
+
+              <span className="hidden sm:inline">
+
+                {
+                  cerrandoSesion
                     ? "Cerrando..."
-                    : "Cerrar sesión"}
-                </span>
+                    : "Cerrar sesión"
+                }
+
+              </span>
 
             </button>
 
-            </div>
+          </div>
 
         </div>
-        </header>
+
+      </header>
+
 
       {/* =====================================================
           CONTENIDO
           ===================================================== */}
 
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div className="
+        mx-auto
+        max-w-7xl
+        px-4
+        py-6
+        sm:px-6
+        sm:py-8
+        lg:px-8
+      ">
+
 
         {/* ===================================================
             BUSCADOR
             =================================================== */}
 
-        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section className="
+          overflow-hidden
+          rounded-2xl
+          border
+          border-slate-200
+          bg-white
+          shadow-sm
+        ">
 
-          <div className="border-b border-slate-100 px-5 py-5 sm:px-7">
+          <div className="
+            border-b
+            border-slate-100
+            px-5
+            py-5
+            sm:px-7
+          ">
 
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="
+              text-lg
+              font-semibold
+              text-slate-900
+            ">
               Buscar pasajero
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="
+              mt-1
+              text-sm
+              text-slate-500
+            ">
               Ingrese el número de documento para consultar sus próximos viajes.
             </p>
 
           </div>
+
 
           <form
             onSubmit={consultar}
             className="p-5 sm:p-7"
           >
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="
+              flex
+              flex-col
+              gap-3
+              sm:flex-row
+              sm:items-end
+            ">
+
+
+              {/* DOCUMENTO */}
 
               <div className="flex-1">
 
                 <label
                   htmlFor="dni"
-                  className="mb-2 block text-sm font-medium text-slate-700"
+                  className="
+                    mb-2
+                    block
+                    text-sm
+                    font-medium
+                    text-slate-700
+                  "
                 >
                   Número de documento
                 </label>
 
+
                 <input
                   id="dni"
                   type="text"
-                  inputMode="numeric"
+
+                  // Debe permitir letras y números.
+                  inputMode="text"
+
                   autoComplete="off"
                   maxLength={20}
                   value={dni}
 
                   onChange={(event) => {
 
-                    const value = event.target.value
-                      .replace(/[^a-zA-Z0-9]/g, "")
-                      .toUpperCase();
+                    const value =
+                      event.target.value
+                        .replace(
+                          /[^a-zA-Z0-9]/g,
+                          ""
+                        )
+                        .toUpperCase();
 
                     setDni(value);
                   }}
@@ -381,19 +542,24 @@ function formatearHora(hora: string) {
                     px-4
                     text-base
                     text-slate-900
+                    caret-slate-900
                     outline-none
                     transition
                     placeholder:text-slate-400
-                    focus:border-blue-500
+                    focus:border-orange-500
                     focus:ring-4
-                    focus:ring-blue-100
+                    focus:ring-orange-100
                   "
                 />
 
               </div>
 
+
+              {/* BOTÓN BUSCAR */}
+
               <button
                 type="submit"
+
                 disabled={
                   cargando ||
                   dni.length < 8
@@ -402,36 +568,152 @@ function formatearHora(hora: string) {
                 className="
                   h-12
                   rounded-xl
-                  bg-blue-600
+                  bg-orange-500
                   px-7
                   font-semibold
                   text-white
                   shadow-sm
                   transition
-                  hover:bg-blue-700
+                  hover:bg-orange-600
                   focus:outline-none
                   focus:ring-4
-                  focus:ring-blue-200
+                  focus:ring-orange-200
                   disabled:cursor-not-allowed
                   disabled:bg-slate-300
                   sm:min-w-32
                 "
               >
-                {cargando
-                  ? "Buscando..."
-                  : "Buscar"}
+
+                {
+                  cargando
+                    ? "Buscando..."
+                    : "Buscar"
+                }
+
               </button>
 
             </div>
 
+
+            {/* MENSAJE DE ERROR */}
+
             {mensaje && (
-              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+
+              <div className="
+                mt-4
+                rounded-xl
+                border
+                border-red-200
+                bg-red-50
+                px-4
+                py-3
+                text-sm
+                text-red-700
+              ">
                 {mensaje}
               </div>
+
             )}
 
           </form>
+
         </section>
+
+
+        {/* ===================================================
+            NOTA INFORMATIVA
+            =================================================== */}
+
+        {login && (
+
+          <div className="
+            mt-4
+            flex
+            gap-3
+            rounded-xl
+            border
+            border-amber-200
+            bg-amber-50
+            px-4
+            py-4
+            text-amber-900
+          ">
+
+
+            {/* ICONO */}
+
+            <div className="
+              mt-0.5
+              shrink-0
+              text-amber-500
+            ">
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+
+                <path
+                  d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                />
+
+                <line
+                  x1="12"
+                  x2="12"
+                  y1="9"
+                  y2="13"
+                />
+
+                <line
+                  x1="12"
+                  x2="12.01"
+                  y1="17"
+                  y2="17"
+                />
+
+              </svg>
+
+            </div>
+
+
+            {/* TEXTO */}
+
+            <p className="
+              text-sm
+              leading-6
+            ">
+
+              <span className="font-bold">
+                Nota:
+              </span>{" "}
+
+              La información visualizada corresponde
+              únicamente a los registros de emisión
+              realizados por el usuario{" "}
+
+              <span className="font-semibold">
+                {login}
+              </span>
+
+              , cuyos viajes están programados desde
+              la fecha actual en adelante, de acuerdo
+              con los datos registrados al momento
+              de la compra.
+
+            </p>
+
+          </div>
+
+        )}
+
 
         {/* ===================================================
             RESULTADOS
@@ -439,41 +721,81 @@ function formatearHora(hora: string) {
 
         <section className="mt-6">
 
+
+          {/* CABECERA RESULTADOS */}
+
           {pasajes.length > 0 && (
-            <div className="mb-3 flex items-center justify-between">
+
+            <div className="
+              mb-3
+              flex
+              items-center
+              justify-between
+            ">
 
               <div>
-                <h2 className="font-semibold text-slate-900">
+
+                <h2 className="
+                  font-semibold
+                  text-slate-900
+                ">
                   Pasajes encontrados
                 </h2>
 
-                <p className="text-sm text-slate-500">
+                <p className="
+                  text-sm
+                  text-slate-500
+                ">
+
                   {pasajes.length} resultado
-                  {pasajes.length !== 1
-                    ? "s"
-                    : ""}
+
+                  {
+                    pasajes.length !== 1
+                      ? "s"
+                      : ""
+                  }
+
                 </p>
+
               </div>
 
             </div>
+
           )}
+
 
           {/* =================================================
               TABLA - DESKTOP / TABLET
               ================================================= */}
 
           {pasajes.length > 0 && (
-            <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm md:block">
+
+            <div className="
+              hidden
+              overflow-hidden
+              rounded-2xl
+              border
+              border-slate-200
+              bg-white
+              shadow-sm
+              md:block
+            ">
 
               <div className="overflow-x-auto">
 
-                <table className="w-full min-w-[1150px]">
+                <table className="
+                  w-full
+                  min-w-[1150px]
+                ">
 
                   <thead className="bg-slate-50">
 
-                    <tr className="border-b border-slate-200">
+                    <tr className="
+                      border-b
+                      border-slate-200
+                    ">
 
-                    {[
+                      {[
                         "Asiento",
                         "Serie",
                         "Número",
@@ -485,78 +807,199 @@ function formatearHora(hora: string) {
                         "Fecha viaje",
                         "Turno",
                         "PDF",
-                        ].map((titulo) => (
-                        <th
-                          key={titulo}
-                          className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500"
-                        >
-                          {titulo}
-                        </th>
-                      ))}
+                      ].map(
+                        (titulo) => (
+
+                          <th
+                            key={titulo}
+                            className="
+                              px-4
+                              py-3
+                              text-left
+                              text-xs
+                              font-semibold
+                              uppercase
+                              tracking-wide
+                              text-slate-500
+                            "
+                          >
+                            {titulo}
+                          </th>
+
+                        )
+                      )}
 
                     </tr>
 
                   </thead>
 
-                  <tbody className="divide-y divide-slate-100">
+
+                  <tbody className="
+                    divide-y
+                    divide-slate-100
+                  ">
 
                     {pasajes.map(
-                      (pasaje, index) => (
+                      (
+                        pasaje,
+                        index
+                      ) => (
 
                         <tr
                           key={`${pasaje.serie}-${pasaje.numero}-${index}`}
-                          className="transition hover:bg-blue-50/40"
+
+                          className="
+                            transition
+                            hover:bg-orange-50/50
+                          "
                         >
 
-                          <td className="px-4 py-4 text-sm font-semibold text-slate-900">
+
+                          {/* ASIENTO */}
+
+                          <td className="
+                            px-4
+                            py-4
+                            text-sm
+                            font-semibold
+                            text-slate-900
+                          ">
                             {pasaje.asiento}
                           </td>
 
-                          <td className="px-4 py-4 text-sm text-slate-700">
+
+                          {/* SERIE */}
+
+                          <td className="
+                            px-4
+                            py-4
+                            text-sm
+                            text-slate-700
+                          ">
                             {pasaje.serie}
                           </td>
 
-                          <td className="px-4 py-4 text-sm text-slate-700">
+
+                          {/* NÚMERO */}
+
+                          <td className="
+                            px-4
+                            py-4
+                            text-sm
+                            text-slate-700
+                          ">
                             {pasaje.numero}
                           </td>
 
-                          <td className="px-4 py-4 text-sm text-slate-600">
+
+                          {/* EMISIÓN */}
+
+                          <td className="
+                            px-4
+                            py-4
+                            text-sm
+                            text-slate-600
+                          ">
+
                             {formatearFecha(
                               pasaje.emision
                             )}
+
                           </td>
 
-                          <td className="px-4 py-4 text-sm font-medium text-slate-900">
+
+                          {/* PASAJERO */}
+
+                          <td className="
+                            px-4
+                            py-4
+                            text-sm
+                            font-medium
+                            text-slate-900
+                          ">
                             {pasaje.pasajero}
                           </td>
 
-                          <td className="px-4 py-4 text-sm text-slate-600">
+
+                          {/* ORIGEN */}
+
+                          <td className="
+                            px-4
+                            py-4
+                            text-sm
+                            text-slate-600
+                          ">
                             {pasaje.origen}
                           </td>
 
-                          <td className="px-4 py-4 text-sm text-slate-600">
+
+                          {/* DESTINO */}
+
+                          <td className="
+                            px-4
+                            py-4
+                            text-sm
+                            text-slate-600
+                          ">
                             {pasaje.destino}
                           </td>
 
-                          <td className="px-4 py-4 text-sm font-semibold text-slate-900">
+
+                          {/* PRECIO */}
+
+                          <td className="
+                            px-4
+                            py-4
+                            text-sm
+                            font-semibold
+                            text-slate-900
+                          ">
+
                             {formatearPrecio(
                               pasaje.precio
                             )}
+
                           </td>
 
-                          <td className="px-4 py-4 text-sm text-slate-700">
+
+                          {/* FECHA VIAJE */}
+
+                          <td className="
+                            px-4
+                            py-4
+                            text-sm
+                            text-slate-700
+                          ">
+
                             {formatearFecha(
                               pasaje.fechaViaje
                             )}
+
                           </td>
 
-                          <td className="px-4 py-4 text-sm text-slate-700">
+
+                          {/* TURNO */}
+
+                          <td className="
+                            px-4
+                            py-4
+                            text-sm
+                            text-slate-700
+                          ">
+
                             {formatearHora(
                               pasaje.turno
                             )}
+
                           </td>
 
-                          <td className="px-4 py-4">
+
+                          {/* PDF */}
+
+                          <td className="
+                            px-4
+                            py-4
+                          ">
 
                             <a
                               href={pasaje.pdfUrl}
@@ -595,46 +1038,106 @@ function formatearHora(hora: string) {
               </div>
 
             </div>
+
           )}
+
 
           {/* =================================================
               TARJETAS - CELULAR
               ================================================= */}
 
           {pasajes.length > 0 && (
-            <div className="space-y-4 md:hidden">
+
+            <div className="
+              space-y-4
+              md:hidden
+            ">
 
               {pasajes.map(
-                (pasaje, index) => (
+                (
+                  pasaje,
+                  index
+                ) => (
 
                   <article
                     key={`${pasaje.serie}-${pasaje.numero}-${index}`}
-                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+
+                    className="
+                      overflow-hidden
+                      rounded-2xl
+                      border
+                      border-slate-200
+                      bg-white
+                      shadow-sm
+                    "
                   >
 
-                    <div className="border-b border-slate-100 p-5">
 
-                      <div className="flex items-start justify-between gap-3">
+                    {/* CABECERA TARJETA */}
+
+                    <div className="
+                      border-b
+                      border-slate-100
+                      p-5
+                    ">
+
+                      <div className="
+                        flex
+                        items-start
+                        justify-between
+                        gap-3
+                      ">
+
+
+                        {/* DOCUMENTO */}
 
                         <div>
 
-                          <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-                            {pasaje.serie} - {pasaje.numero}
+                          <p className="
+                            text-xs
+                            font-semibold
+                            uppercase
+                            tracking-wide
+                            text-orange-600
+                          ">
+                            {pasaje.serie}
+                            {" - "}
+                            {pasaje.numero}
                           </p>
 
-                          <h3 className="mt-1 font-semibold text-slate-900">
+                          <h3 className="
+                            mt-1
+                            font-semibold
+                            text-slate-900
+                          ">
                             {pasaje.pasajero}
                           </h3>
 
                         </div>
 
-                        <div className="rounded-lg bg-slate-100 px-3 py-2 text-center">
 
-                          <p className="text-[10px] uppercase text-slate-500">
+                        {/* ASIENTO */}
+
+                        <div className="
+                          rounded-lg
+                          bg-slate-100
+                          px-3
+                          py-2
+                          text-center
+                        ">
+
+                          <p className="
+                            text-[10px]
+                            uppercase
+                            text-slate-500
+                          ">
                             Asiento
                           </p>
 
-                          <p className="font-bold text-slate-900">
+                          <p className="
+                            font-bold
+                            text-slate-900
+                          ">
                             {pasaje.asiento}
                           </p>
 
@@ -644,33 +1147,59 @@ function formatearHora(hora: string) {
 
                     </div>
 
+
+                    {/* CONTENIDO TARJETA */}
+
                     <div className="p-5">
 
-                      <div className="flex items-center gap-3">
+
+                      {/* ORIGEN / DESTINO */}
+
+                      <div className="
+                        flex
+                        items-center
+                        gap-3
+                      ">
 
                         <div className="flex-1">
 
-                          <p className="text-xs text-slate-400">
+                          <p className="
+                            text-xs
+                            text-slate-400
+                          ">
                             Origen
                           </p>
 
-                          <p className="font-medium text-slate-800">
+                          <p className="
+                            font-medium
+                            text-slate-800
+                          ">
                             {pasaje.origen}
                           </p>
 
                         </div>
 
-                        <span className="text-slate-300">
+
+                        <span className="
+                          text-orange-400
+                        ">
                           →
                         </span>
 
+
                         <div className="flex-1">
 
-                          <p className="text-xs text-slate-400">
+                          <p className="
+                            text-xs
+                            text-slate-400
+                          ">
                             Destino
                           </p>
 
-                          <p className="font-medium text-slate-800">
+                          <p className="
+                            font-medium
+                            text-slate-800
+                          ">
                             {pasaje.destino}
                           </p>
 
@@ -678,65 +1207,128 @@ function formatearHora(hora: string) {
 
                       </div>
 
-                      <div className="mt-5 grid grid-cols-2 gap-4">
+
+                      {/* DATOS */}
+
+                      <div className="
+                        mt-5
+                        grid
+                        grid-cols-2
+                        gap-4
+                      ">
+
+
+                        {/* FECHA VIAJE */}
 
                         <div>
 
-                          <p className="text-xs text-slate-400">
+                          <p className="
+                            text-xs
+                            text-slate-400
+                          ">
                             Fecha de viaje
                           </p>
 
-                          <p className="mt-1 text-sm font-medium text-slate-800">
+                          <p className="
+                            mt-1
+                            text-sm
+                            font-medium
+                            text-slate-800
+                          ">
+
                             {formatearFecha(
                               pasaje.fechaViaje
                             )}
+
                           </p>
 
                         </div>
 
+
+                        {/* TURNO */}
+
                         <div>
 
-                          <p className="text-xs text-slate-400">
+                          <p className="
+                            text-xs
+                            text-slate-400
+                          ">
                             Turno
                           </p>
 
-                          <p className="mt-1 text-sm font-medium text-slate-800">
+                          <p className="
+                            mt-1
+                            text-sm
+                            font-medium
+                            text-slate-800
+                          ">
+
                             {formatearHora(
                               pasaje.turno
                             )}
+
                           </p>
 
                         </div>
 
+
+                        {/* EMISIÓN */}
+
                         <div>
 
-                          <p className="text-xs text-slate-400">
+                          <p className="
+                            text-xs
+                            text-slate-400
+                          ">
                             Emisión
                           </p>
 
-                          <p className="mt-1 text-sm font-medium text-slate-800">
+                          <p className="
+                            mt-1
+                            text-sm
+                            font-medium
+                            text-slate-800
+                          ">
+
                             {formatearFecha(
                               pasaje.emision
                             )}
+
                           </p>
 
                         </div>
 
+
+                        {/* PRECIO */}
+
                         <div>
 
-                          <p className="text-xs text-slate-400">
+                          <p className="
+                            text-xs
+                            text-slate-400
+                          ">
                             Precio
                           </p>
 
-                          <p className="mt-1 text-sm font-bold text-slate-900">
+                          <p className="
+                            mt-1
+                            text-sm
+                            font-bold
+                            text-slate-900
+                          ">
+
                             {formatearPrecio(
                               pasaje.precio
                             )}
+
                           </p>
 
                         </div>
 
                       </div>
+
+
+                      {/* BOTÓN PDF */}
 
                       <a
                         href={pasaje.pdfUrl}
@@ -755,6 +1347,7 @@ function formatearHora(hora: string) {
                           font-semibold
                           text-white
                           transition
+                          hover:bg-slate-800
                           active:scale-[0.99]
                         "
                       >
@@ -769,33 +1362,64 @@ function formatearHora(hora: string) {
               )}
 
             </div>
+
           )}
+
 
           {/* =================================================
               SIN RESULTADOS
               ================================================= */}
 
-          {consultado &&
+          {
+            consultado &&
             pasajes.length === 0 &&
             !cargando && (
 
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-12 text-center">
+              <div className="
+                rounded-2xl
+                border
+                border-dashed
+                border-slate-300
+                bg-white
+                px-5
+                py-12
+                text-center
+              ">
 
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-xl">
+                <div className="
+                  mx-auto
+                  flex
+                  h-12
+                  w-12
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-orange-50
+                  text-xl
+                ">
                   🔎
                 </div>
 
-                <h3 className="mt-4 font-semibold text-slate-800">
+                <h3 className="
+                  mt-4
+                  font-semibold
+                  text-slate-800
+                ">
                   No se encontraron pasajes
                 </h3>
 
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="
+                  mt-1
+                  text-sm
+                  text-slate-500
+                ">
                   No existen viajes disponibles para el documento ingresado.
                 </p>
 
               </div>
 
-            )}
+            )
+          }
 
         </section>
 
