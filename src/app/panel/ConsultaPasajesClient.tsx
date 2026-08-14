@@ -95,9 +95,9 @@ export default function ConsultaPasajesClient({
     setMensaje("");
     setConsultado(false);
 
-    if (!/^\d{8,20}$/.test(dni)) {
-      setMensaje(
-        "Ingrese un número de documento de al menos 8 dígitos."
+    if (!/^[A-Za-z0-9]{8,20}$/.test(dni)) {
+    setMensaje(
+        "Ingrese un número de documento válido de al menos 8 caracteres."
       );
 
       return;
@@ -362,16 +362,14 @@ function formatearHora(hora: string) {
 
                   onChange={(event) => {
 
-                    const value =
-                      event.target.value.replace(
-                        /\D/g,
-                        ""
-                      );
+                    const value = event.target.value
+                      .replace(/[^a-zA-Z0-9]/g, "")
+                      .toUpperCase();
 
                     setDni(value);
                   }}
 
-                  placeholder="Ej. 12345678"
+                  placeholder="Ej. 45048544 o CE12345678"
 
                   className="
                     h-12

@@ -90,9 +90,23 @@ try {
     // 3. CONSTRUIR URL DEL SISTEMA ANTIGUO
     // =========================================================
 
-    const url = new URL(
-      "https://mgerencial.transporteschiclayo.pe/Imprimir/Pagina/ImpBD_PjeBoletaFactura.aspx?"
-    );
+    const pdfServiceUrl =
+      process.env.PDF_SERVICE_URL;
+
+    if (!pdfServiceUrl) {
+      console.error(
+        "PDF_SERVICE_URL no está configurado."
+      );
+
+      return new Response(
+        "El servicio de documentos no está configurado.",
+        {
+          status: 500,
+        }
+      );
+    }
+
+    const url = new URL(pdfServiceUrl);
 
     url.searchParams.set(
       "Opcion",

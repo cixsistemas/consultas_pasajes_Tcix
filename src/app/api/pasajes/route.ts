@@ -91,14 +91,14 @@ export async function GET(
         .get("dni")
         ?.trim() ?? "";
 
-    // El DNI/documento solo puede contener números
+    // El DNI/documento solo puede contener números y letras, sin espacios ni caracteres especiales
     // y debe tener entre 8 y 20 caracteres.
-    if (!/^\d{8,20}$/.test(dni)) {
+    if (!/^[A-Za-z0-9]{8,20}$/.test(dni)) {
       return NextResponse.json(
         {
           ok: false,
           mensaje:
-            "Ingrese un número de documento válido de al menos 8 dígitos.",
+            "Ingrese un número de documento válido de al menos 8 caracteres.",
         },
         {
           status: 400,
